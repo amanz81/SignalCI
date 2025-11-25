@@ -13,14 +13,22 @@ const ActionNode = ({ data }: { data: { actionType?: string } }) => {
                 </div>
                 <div className="ml-3">
                     <div className="text-base font-bold text-gray-900">Action</div>
-                    <div className="text-gray-500 text-xs">Send {actionType}</div>
+                    <div className="text-gray-500 text-xs">Send {actionType} • 1→1</div>
                 </div>
             </div>
+            {/* Input handle */}
             <Handle 
                 type="target" 
                 position={Position.Top} 
-                className="!w-3 !h-3 !bg-blue-500 !border-2 !border-white hover:!bg-blue-600 hover:!scale-125 transition-all"
-                style={{ top: -6 }}
+                className="!w-4 !h-4 !bg-purple-500 !border-[3px] !border-white !shadow-md hover:!bg-purple-400 hover:!scale-150 !transition-all !cursor-crosshair"
+                style={{ top: -8 }}
+            />
+            {/* Output handle (can chain to another action) */}
+            <Handle 
+                type="source" 
+                position={Position.Bottom} 
+                className="!w-4 !h-4 !bg-purple-500 !border-[3px] !border-white !shadow-md hover:!bg-purple-400 hover:!scale-150 !transition-all !cursor-crosshair"
+                style={{ bottom: -8 }}
             />
         </div>
     );

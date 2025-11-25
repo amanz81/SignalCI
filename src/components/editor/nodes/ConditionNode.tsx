@@ -62,7 +62,7 @@ const ConditionNode = ({ data }: { data: ConditionData }) => {
     }
 
     return (
-        <div className={`px-4 py-3 shadow-lg rounded-lg bg-white border-2 ${colors.border} hover:opacity-90 transition-all min-w-[160px]`}>
+        <div className={`px-4 py-3 shadow-lg rounded-lg bg-white border-2 ${colors.border} hover:opacity-90 transition-all min-w-[180px]`}>
             <div className="flex items-center">
                 <div className={`rounded-full w-10 h-10 flex justify-center items-center ${colors.bg}`}>
                     <Icon className={`w-5 h-5 ${colors.text}`} />
@@ -75,22 +75,36 @@ const ConditionNode = ({ data }: { data: ConditionData }) => {
                         </span>
                     </div>
                     <div className="text-gray-500 text-xs truncate" title={displayValue}>
-                        {displayValue}
+                        {displayValue} • 1→2
                     </div>
                 </div>
             </div>
+            {/* Input handle */}
             <Handle 
                 type="target" 
                 position={Position.Top} 
-                className="!w-3 !h-3 !bg-blue-500 !border-2 !border-white hover:!bg-blue-600 hover:!scale-125 transition-all"
-                style={{ top: -6 }}
+                className="!w-4 !h-4 !bg-blue-500 !border-[3px] !border-white !shadow-md hover:!bg-blue-400 hover:!scale-150 !transition-all !cursor-crosshair"
+                style={{ top: -8 }}
             />
+            {/* Output handle - True/Continue (left) */}
             <Handle 
                 type="source" 
-                position={Position.Bottom} 
-                className="!w-3 !h-3 !bg-blue-500 !border-2 !border-white hover:!bg-blue-600 hover:!scale-125 transition-all"
-                style={{ bottom: -6 }}
+                position={Position.Bottom}
+                id="true"
+                className="!w-4 !h-4 !bg-green-500 !border-[3px] !border-white !shadow-md hover:!bg-green-400 hover:!scale-150 !transition-all !cursor-crosshair"
+                style={{ bottom: -8, left: '30%' }}
             />
+            {/* Output handle - False/Else (right) */}
+            <Handle 
+                type="source" 
+                position={Position.Bottom}
+                id="false"
+                className="!w-4 !h-4 !bg-red-500 !border-[3px] !border-white !shadow-md hover:!bg-red-400 hover:!scale-150 !transition-all !cursor-crosshair"
+                style={{ bottom: -8, left: '70%' }}
+            />
+            {/* Handle labels */}
+            <div className="absolute -bottom-6 left-[30%] -translate-x-1/2 text-[9px] text-green-600 font-medium">✓</div>
+            <div className="absolute -bottom-6 left-[70%] -translate-x-1/2 text-[9px] text-red-600 font-medium">✗</div>
         </div>
     );
 };
