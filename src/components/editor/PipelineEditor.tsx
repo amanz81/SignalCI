@@ -16,7 +16,11 @@ import ConditionNode from './nodes/ConditionNode';
 import ActionNode from './nodes/ActionNode';
 import NodeConfigPanel from './NodeConfigPanel';
 
-export default function PipelineEditor() {
+interface PipelineEditorProps {
+    darkMode?: boolean;
+}
+
+export default function PipelineEditor({ darkMode = false }: PipelineEditorProps) {
     const nodes = usePipelineStore((state) => state.nodes);
     const edges = usePipelineStore((state) => state.edges);
     const onNodesChange = usePipelineStore((state) => state.onNodesChange);
@@ -62,7 +66,7 @@ export default function PipelineEditor() {
                         onNodeClick={onNodeClick}
                         nodeTypes={nodeTypes}
                         fitView
-                        className="bg-slate-50"
+                        className={darkMode ? "bg-gray-900" : "bg-slate-50"}
                         connectionLineStyle={{ stroke: '#3b82f6', strokeWidth: 2 }}
                         defaultEdgeOptions={{ 
                             style: { stroke: '#3b82f6', strokeWidth: 2 },
@@ -70,10 +74,10 @@ export default function PipelineEditor() {
                             animated: true
                         }}
                     >
-                        <Background color="#cbd5e1" gap={16} />
-                        <Controls className="bg-white border shadow-lg" />
+                        <Background color={darkMode ? "#374151" : "#cbd5e1"} gap={16} />
+                        <Controls className={darkMode ? "bg-gray-800 border-gray-700 shadow-lg [&>button]:bg-gray-800 [&>button]:border-gray-700 [&>button]:text-gray-300 [&>button:hover]:bg-gray-700" : "bg-white border shadow-lg"} />
                         <MiniMap 
-                            className="bg-white border shadow-lg"
+                            className={darkMode ? "bg-gray-800 border-gray-700 shadow-lg" : "bg-white border shadow-lg"}
                             nodeColor={(node) => {
                                 switch (node.type) {
                                     case 'trigger': return '#10b981';
@@ -83,13 +87,14 @@ export default function PipelineEditor() {
                                     default: return '#6b7280';
                                 }
                             }}
+                            maskColor={darkMode ? "rgba(0, 0, 0, 0.7)" : "rgba(0, 0, 0, 0.1)"}
                         />
                     </ReactFlow>
                 </ReactFlowProvider>
             </div>
 
             {/* Right Sidebar - Properties */}
-            <div className="w-80 bg-white border-l shadow-lg flex flex-col">
+            <div className="w-80 bg-white dark:bg-gray-900 border-l border-gray-200 dark:border-gray-800 shadow-lg flex flex-col">
                 {selectedNode ? (
                     <NodeConfigPanel
                         nodeId={selectedNode.id}
@@ -100,7 +105,7 @@ export default function PipelineEditor() {
                     />
                 ) : (
                     <div className="flex-1 flex items-center justify-center p-6">
-                        <div className="text-center text-gray-400">
+                        <div className="text-center text-gray-400 dark:text-gray-500">
                             <div className="text-4xl mb-4">📋</div>
                             <p className="text-sm font-medium">Select a node to configure</p>
                             <p className="text-xs mt-2">Click on any node in the canvas to view and edit its properties</p>

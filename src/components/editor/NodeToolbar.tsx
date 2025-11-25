@@ -57,15 +57,15 @@ export default function NodeToolbar() {
                     <button
                         key={nodeType.type}
                         onClick={() => addNode(nodeType.type)}
-                        className="w-full p-3 text-left border-2 border-gray-200 rounded-lg hover:border-blue-400 hover:bg-blue-50 transition-all group"
+                        className="w-full p-3 text-left border-2 border-gray-200 dark:border-gray-700 rounded-lg hover:border-blue-400 dark:hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-all group bg-white dark:bg-gray-800"
                     >
                         <div className="flex items-center gap-3">
                             <div className={`${nodeType.color} p-2 rounded-lg text-white group-hover:scale-110 transition-transform`}>
                                 <Icon className="w-5 h-5" />
                             </div>
                             <div className="flex-1">
-                                <div className="font-semibold text-gray-900">{nodeType.label}</div>
-                                <div className="text-xs text-gray-500 mt-0.5">{nodeType.description}</div>
+                                <div className="font-semibold text-gray-900 dark:text-gray-100">{nodeType.label}</div>
+                                <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{nodeType.description}</div>
                             </div>
                         </div>
                     </button>

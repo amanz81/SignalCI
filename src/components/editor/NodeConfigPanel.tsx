@@ -12,6 +12,10 @@ interface NodeConfigPanelProps {
     onSave: (data: any) => void;
 }
 
+const inputStyles = "w-full p-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500";
+const selectStyles = "w-full p-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 cursor-pointer";
+const labelStyles = "block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2";
+
 export default function NodeConfigPanel({ nodeId, nodeType, nodeData, onClose, onSave }: NodeConfigPanelProps) {
     const [data, setData] = useState(nodeData || {});
 
@@ -25,10 +29,10 @@ export default function NodeConfigPanel({ nodeId, nodeType, nodeData, onClose, o
             case 'wait':
                 return (
                     <div>
-                        <label className="block text-sm font-semibold text-gray-700 mb-2">Duration (seconds)</label>
+                        <label className={labelStyles}>Duration (seconds)</label>
                         <input
                             type="number"
-                            className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
+                            className={inputStyles}
                             value={data.duration || 10}
                             onChange={(e) => setData({ ...data, duration: parseInt(e.target.value) })}
                             placeholder="10"
@@ -40,9 +44,9 @@ export default function NodeConfigPanel({ nodeId, nodeType, nodeData, onClose, o
                 return (
                     <>
                         <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-2">Condition Type</label>
+                            <label className={labelStyles}>Condition Type</label>
                             <select
-                                className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors bg-white"
+                                className={selectStyles}
                                 value={data.conditionType || 'volume'}
                                 onChange={(e) => setData({ ...data, conditionType: e.target.value })}
                             >
@@ -53,10 +57,10 @@ export default function NodeConfigPanel({ nodeId, nodeType, nodeData, onClose, o
                             </select>
                         </div>
                         <div className="mt-4">
-                            <label className="block text-sm font-semibold text-gray-700 mb-2">Threshold</label>
+                            <label className={labelStyles}>Threshold</label>
                             <input
                                 type="text"
-                                className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
+                                className={inputStyles}
                                 value={data.threshold || ''}
                                 onChange={(e) => setData({ ...data, threshold: e.target.value })}
                                 placeholder="e.g., > 1000000"
@@ -69,9 +73,9 @@ export default function NodeConfigPanel({ nodeId, nodeType, nodeData, onClose, o
                 return (
                     <>
                         <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-2">Action Type</label>
+                            <label className={labelStyles}>Action Type</label>
                             <select
-                                className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors bg-white"
+                                className={selectStyles}
                                 value={data.actionType || 'telegram'}
                                 onChange={(e) => setData({ ...data, actionType: e.target.value })}
                             >
@@ -82,9 +86,9 @@ export default function NodeConfigPanel({ nodeId, nodeType, nodeData, onClose, o
                             </select>
                         </div>
                         <div className="mt-4">
-                            <label className="block text-sm font-semibold text-gray-700 mb-2">Message Template</label>
+                            <label className={labelStyles}>Message Template</label>
                             <textarea
-                                className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors resize-none"
+                                className={`${inputStyles} resize-none`}
                                 rows={4}
                                 value={data.message || ''}
                                 onChange={(e) => setData({ ...data, message: e.target.value })}
@@ -95,26 +99,26 @@ export default function NodeConfigPanel({ nodeId, nodeType, nodeData, onClose, o
                 );
 
             default:
-                return <p className="text-gray-500">No configuration needed for this node type.</p>;
+                return <p className="text-gray-500 dark:text-gray-400">No configuration needed for this node type.</p>;
         }
     };
 
     return (
-        <div className="h-full flex flex-col bg-white">
-            <div className="p-4 border-b bg-slate-50 flex justify-between items-center">
+        <div className="h-full flex flex-col bg-white dark:bg-gray-900">
+            <div className="p-4 border-b border-gray-200 dark:border-gray-700 bg-slate-50 dark:bg-gray-800 flex justify-between items-center">
                 <div>
-                    <h2 className="text-lg font-bold text-gray-900">Node Properties</h2>
-                    <p className="text-xs text-gray-500 mt-0.5">{nodeType.charAt(0).toUpperCase() + nodeType.slice(1)} Configuration</p>
+                    <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">Node Properties</h2>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{nodeType.charAt(0).toUpperCase() + nodeType.slice(1)} Configuration</p>
                 </div>
-                <button onClick={onClose} className="p-1.5 hover:bg-gray-200 rounded transition-colors">
-                    <X className="w-4 h-4 text-gray-500" />
+                <button onClick={onClose} className="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors">
+                    <X className="w-4 h-4 text-gray-500 dark:text-gray-400" />
                 </button>
             </div>
 
             <div className="flex-1 p-4 overflow-y-auto">
-                <div className="bg-blue-50 border border-blue-200 p-3 rounded-lg mb-4 text-xs">
-                    <div className="font-semibold text-blue-900 mb-1">Node ID</div>
-                    <code className="text-blue-700 font-mono">{nodeId}</code>
+                <div className="bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 p-3 rounded-lg mb-4 text-xs">
+                    <div className="font-semibold text-blue-900 dark:text-blue-300 mb-1">Node ID</div>
+                    <code className="text-blue-700 dark:text-blue-400 font-mono">{nodeId}</code>
                 </div>
 
                 <div className="space-y-4">
@@ -122,7 +126,7 @@ export default function NodeConfigPanel({ nodeId, nodeType, nodeData, onClose, o
                 </div>
             </div>
 
-            <div className="p-4 border-t bg-slate-50 flex gap-2">
+            <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-slate-50 dark:bg-gray-800 flex gap-2">
                 <Button variant="outline" onClick={onClose} className="flex-1">Cancel</Button>
                 <Button onClick={handleSave} className="flex-1 bg-blue-600 hover:bg-blue-700">Save</Button>
             </div>
