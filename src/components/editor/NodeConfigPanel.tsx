@@ -15,6 +15,57 @@ interface NodeConfigPanelProps {
 const inputStyles = "w-full p-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500";
 const selectStyles = "w-full p-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 cursor-pointer";
 const labelStyles = "block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2";
+const helpTextStyles = "text-xs text-gray-500 dark:text-gray-400 mt-1";
+
+// Condition type configurations
+const conditionCategories = {
+    market: {
+        label: '📊 Market Metrics',
+        options: [
+            { value: 'volume', label: 'Volume', placeholder: 'e.g., > 1000000', help: 'Check trading volume against threshold' },
+            { value: 'price', label: 'Price Level', placeholder: 'e.g., > 50000', help: 'Check if price crosses a level' },
+            { value: 'price_change', label: 'Price Change %', placeholder: 'e.g., > 5', help: 'Check percentage change in price' },
+            { value: 'rsi', label: 'RSI (Relative Strength)', placeholder: 'e.g., < 30 or > 70', help: 'RSI overbought/oversold levels' },
+            { value: 'macd', label: 'MACD Signal', placeholder: 'e.g., crossover', help: 'MACD crossover signals' },
+            { value: 'moving_avg', label: 'Moving Average', placeholder: 'e.g., price > MA50', help: 'Price vs moving average' },
+        ]
+    },
+    macro: {
+        label: '🌍 Macro & Sentiment',
+        options: [
+            { value: 'google_trends', label: 'Google Trends', placeholder: 'e.g., "bitcoin" > 80', help: 'Search interest on Google Trends' },
+            { value: 'fear_greed', label: 'Fear & Greed Index', placeholder: 'e.g., < 25 (extreme fear)', help: 'Crypto Fear & Greed Index' },
+            { value: 'social_sentiment', label: 'Social Sentiment', placeholder: 'e.g., twitter_positive > 60%', help: 'Social media sentiment analysis' },
+            { value: 'news_sentiment', label: 'News Sentiment', placeholder: 'e.g., sentiment > 0.5', help: 'News article sentiment score' },
+            { value: 'whale_alert', label: 'Whale Activity', placeholder: 'e.g., transfers > $10M', help: 'Large wallet movements' },
+        ]
+    },
+    onchain: {
+        label: '⛓️ On-Chain Data',
+        options: [
+            { value: 'active_addresses', label: 'Active Addresses', placeholder: 'e.g., > 1000000', help: 'Number of active addresses' },
+            { value: 'exchange_flow', label: 'Exchange Net Flow', placeholder: 'e.g., outflow > 1000 BTC', help: 'Net flow to/from exchanges' },
+            { value: 'hash_rate', label: 'Hash Rate', placeholder: 'e.g., change > 5%', help: 'Network hash rate changes' },
+            { value: 'gas_price', label: 'Gas Price (ETH)', placeholder: 'e.g., < 30 gwei', help: 'Ethereum gas price level' },
+        ]
+    },
+    custom: {
+        label: '⚙️ Custom',
+        options: [
+            { value: 'webhook_response', label: 'Webhook Response', placeholder: 'e.g., response.value > 100', help: 'Custom webhook API response' },
+            { value: 'custom_expression', label: 'Custom Expression', placeholder: 'e.g., {price} > {ma50} && {volume} > 1M', help: 'Write your own condition' },
+        ]
+    }
+};
+
+// Get condition config by value
+const getConditionConfig = (conditionType: string) => {
+    for (const category of Object.values(conditionCategories)) {
+        const found = category.options.find(opt => opt.value === conditionType);
+        if (found) return found;
+    }
+    return { value: conditionType, label: conditionType, placeholder: '', help: '' };
+};
 
 export default function NodeConfigPanel({ nodeId, nodeType, nodeData, onClose, onSave }: NodeConfigPanelProps) {
     const [data, setData] = useState(nodeData || {});
@@ -22,6 +73,125 @@ export default function NodeConfigPanel({ nodeId, nodeType, nodeData, onClose, o
     const handleSave = () => {
         onSave(data);
         onClose();
+    };
+
+    const renderConditionFields = () => {
+        const conditionConfig = getConditionConfig(data.conditionType || 'volume');
+        
+        return (
+            <>
+                <div>
+                    <label className={labelStyles}>Condition Category</label>
+                    <select
+                        className={selectStyles}
+                        value={data.conditionType || 'volume'}
+                        onChange={(e) => setData({ ...data, conditionType: e.target.value, threshold: '' })}
+                    >
+                        {Object.entries(conditionCategories).map(([key, category]) => (
+                            <optgroup key={key} label={category.label}>
+                                {category.options.map(option => (
+                                    <option key={option.value} value={option.value}>
+                                        {option.label}
+                                    </option>
+                                ))}
+                            </optgroup>
+                        ))}
+                    </select>
+                    <p className={helpTextStyles}>{conditionConfig.help}</p>
+                </div>
+
+                <div className="mt-4">
+                    <label className={labelStyles}>Threshold / Expression</label>
+                    <input
+                        type="text"
+                        className={inputStyles}
+                        value={data.threshold || ''}
+                        onChange={(e) => setData({ ...data, threshold: e.target.value })}
+                        placeholder={conditionConfig.placeholder}
+                    />
+                </div>
+
+                {/* Additional fields for specific condition types */}
+                {data.conditionType === 'google_trends' && (
+                    <div className="mt-4">
+                        <label className={labelStyles}>Search Term</label>
+                        <input
+                            type="text"
+                            className={inputStyles}
+                            value={data.searchTerm || ''}
+                            onChange={(e) => setData({ ...data, searchTerm: e.target.value })}
+                            placeholder="e.g., bitcoin, ethereum, crypto"
+                        />
+                        <p className={helpTextStyles}>The keyword to track on Google Trends</p>
+                    </div>
+                )}
+
+                {data.conditionType === 'social_sentiment' && (
+                    <div className="mt-4">
+                        <label className={labelStyles}>Platform</label>
+                        <select
+                            className={selectStyles}
+                            value={data.platform || 'twitter'}
+                            onChange={(e) => setData({ ...data, platform: e.target.value })}
+                        >
+                            <option value="twitter">Twitter/X</option>
+                            <option value="reddit">Reddit</option>
+                            <option value="telegram">Telegram</option>
+                            <option value="all">All Platforms</option>
+                        </select>
+                    </div>
+                )}
+
+                {data.conditionType === 'webhook_response' && (
+                    <div className="mt-4">
+                        <label className={labelStyles}>Webhook URL</label>
+                        <input
+                            type="url"
+                            className={inputStyles}
+                            value={data.webhookUrl || ''}
+                            onChange={(e) => setData({ ...data, webhookUrl: e.target.value })}
+                            placeholder="https://api.example.com/data"
+                        />
+                        <p className={helpTextStyles}>API endpoint to fetch data from</p>
+                    </div>
+                )}
+
+                {(data.conditionType === 'moving_avg' || data.conditionType === 'macd') && (
+                    <div className="mt-4">
+                        <label className={labelStyles}>Timeframe</label>
+                        <select
+                            className={selectStyles}
+                            value={data.timeframe || '1h'}
+                            onChange={(e) => setData({ ...data, timeframe: e.target.value })}
+                        >
+                            <option value="5m">5 Minutes</option>
+                            <option value="15m">15 Minutes</option>
+                            <option value="1h">1 Hour</option>
+                            <option value="4h">4 Hours</option>
+                            <option value="1d">1 Day</option>
+                        </select>
+                    </div>
+                )}
+
+                <div className="mt-4">
+                    <label className={labelStyles}>Comparison Operator</label>
+                    <select
+                        className={selectStyles}
+                        value={data.operator || '>'}
+                        onChange={(e) => setData({ ...data, operator: e.target.value })}
+                    >
+                        <option value=">">Greater than (&gt;)</option>
+                        <option value=">=">Greater than or equal (&gt;=)</option>
+                        <option value="<">Less than (&lt;)</option>
+                        <option value="<=">Less than or equal (&lt;=)</option>
+                        <option value="==">Equal to (==)</option>
+                        <option value="!=">Not equal to (!=)</option>
+                        <option value="crossover">Crossover (above)</option>
+                        <option value="crossunder">Crossunder (below)</option>
+                    </select>
+                </div>
+            </>
+        );
     };
 
     const renderFields = () => {
@@ -41,33 +211,7 @@ export default function NodeConfigPanel({ nodeId, nodeType, nodeData, onClose, o
                 );
 
             case 'condition':
-                return (
-                    <>
-                        <div>
-                            <label className={labelStyles}>Condition Type</label>
-                            <select
-                                className={selectStyles}
-                                value={data.conditionType || 'volume'}
-                                onChange={(e) => setData({ ...data, conditionType: e.target.value })}
-                            >
-                                <option value="volume">Volume Check</option>
-                                <option value="price">Price Level</option>
-                                <option value="rsi">RSI</option>
-                                <option value="custom">Custom</option>
-                            </select>
-                        </div>
-                        <div className="mt-4">
-                            <label className={labelStyles}>Threshold</label>
-                            <input
-                                type="text"
-                                className={inputStyles}
-                                value={data.threshold || ''}
-                                onChange={(e) => setData({ ...data, threshold: e.target.value })}
-                                placeholder="e.g., > 1000000"
-                            />
-                        </div>
-                    </>
-                );
+                return renderConditionFields();
 
             case 'action':
                 return (
