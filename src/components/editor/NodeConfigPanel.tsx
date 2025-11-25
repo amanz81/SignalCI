@@ -25,10 +25,10 @@ export default function NodeConfigPanel({ nodeId, nodeType, nodeData, onClose, o
             case 'wait':
                 return (
                     <div>
-                        <label className="block text-sm font-medium mb-2">Duration (seconds)</label>
+                        <label className="block text-sm font-semibold text-gray-700 mb-2">Duration (seconds)</label>
                         <input
                             type="number"
-                            className="w-full p-2 border rounded"
+                            className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
                             value={data.duration || 10}
                             onChange={(e) => setData({ ...data, duration: parseInt(e.target.value) })}
                             placeholder="10"
@@ -40,9 +40,9 @@ export default function NodeConfigPanel({ nodeId, nodeType, nodeData, onClose, o
                 return (
                     <>
                         <div>
-                            <label className="block text-sm font-medium mb-2">Condition Type</label>
+                            <label className="block text-sm font-semibold text-gray-700 mb-2">Condition Type</label>
                             <select
-                                className="w-full p-2 border rounded"
+                                className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors bg-white"
                                 value={data.conditionType || 'volume'}
                                 onChange={(e) => setData({ ...data, conditionType: e.target.value })}
                             >
@@ -52,11 +52,11 @@ export default function NodeConfigPanel({ nodeId, nodeType, nodeData, onClose, o
                                 <option value="custom">Custom</option>
                             </select>
                         </div>
-                        <div className="mt-3">
-                            <label className="block text-sm font-medium mb-2">Threshold</label>
+                        <div className="mt-4">
+                            <label className="block text-sm font-semibold text-gray-700 mb-2">Threshold</label>
                             <input
                                 type="text"
-                                className="w-full p-2 border rounded"
+                                className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
                                 value={data.threshold || ''}
                                 onChange={(e) => setData({ ...data, threshold: e.target.value })}
                                 placeholder="e.g., > 1000000"
@@ -69,9 +69,9 @@ export default function NodeConfigPanel({ nodeId, nodeType, nodeData, onClose, o
                 return (
                     <>
                         <div>
-                            <label className="block text-sm font-medium mb-2">Action Type</label>
+                            <label className="block text-sm font-semibold text-gray-700 mb-2">Action Type</label>
                             <select
-                                className="w-full p-2 border rounded"
+                                className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors bg-white"
                                 value={data.actionType || 'telegram'}
                                 onChange={(e) => setData({ ...data, actionType: e.target.value })}
                             >
@@ -81,11 +81,11 @@ export default function NodeConfigPanel({ nodeId, nodeType, nodeData, onClose, o
                                 <option value="log">Log Only</option>
                             </select>
                         </div>
-                        <div className="mt-3">
-                            <label className="block text-sm font-medium mb-2">Message Template</label>
+                        <div className="mt-4">
+                            <label className="block text-sm font-semibold text-gray-700 mb-2">Message Template</label>
                             <textarea
-                                className="w-full p-2 border rounded"
-                                rows={3}
+                                className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors resize-none"
+                                rows={4}
                                 value={data.message || ''}
                                 onChange={(e) => setData({ ...data, message: e.target.value })}
                                 placeholder="Signal triggered: {symbol} at {price}"
@@ -100,17 +100,21 @@ export default function NodeConfigPanel({ nodeId, nodeType, nodeData, onClose, o
     };
 
     return (
-        <div className="fixed right-0 top-0 h-full w-96 bg-white shadow-2xl border-l z-50 flex flex-col">
-            <div className="p-4 border-b flex justify-between items-center">
-                <h2 className="text-xl font-bold">Configure {nodeType.charAt(0).toUpperCase() + nodeType.slice(1)} Node</h2>
-                <button onClick={onClose} className="p-1 hover:bg-gray-100 rounded">
-                    <X className="w-5 h-5" />
+        <div className="h-full flex flex-col bg-white">
+            <div className="p-4 border-b bg-slate-50 flex justify-between items-center">
+                <div>
+                    <h2 className="text-lg font-bold text-gray-900">Node Properties</h2>
+                    <p className="text-xs text-gray-500 mt-0.5">{nodeType.charAt(0).toUpperCase() + nodeType.slice(1)} Configuration</p>
+                </div>
+                <button onClick={onClose} className="p-1.5 hover:bg-gray-200 rounded transition-colors">
+                    <X className="w-4 h-4 text-gray-500" />
                 </button>
             </div>
 
             <div className="flex-1 p-4 overflow-y-auto">
-                <div className="bg-blue-50 p-3 rounded mb-4 text-sm text-blue-800">
-                    <strong>Node ID:</strong> {nodeId}
+                <div className="bg-blue-50 border border-blue-200 p-3 rounded-lg mb-4 text-xs">
+                    <div className="font-semibold text-blue-900 mb-1">Node ID</div>
+                    <code className="text-blue-700 font-mono">{nodeId}</code>
                 </div>
 
                 <div className="space-y-4">
@@ -118,9 +122,9 @@ export default function NodeConfigPanel({ nodeId, nodeType, nodeData, onClose, o
                 </div>
             </div>
 
-            <div className="p-4 border-t flex gap-2 justify-end">
-                <Button variant="outline" onClick={onClose}>Cancel</Button>
-                <Button onClick={handleSave}>Save Configuration</Button>
+            <div className="p-4 border-t bg-slate-50 flex gap-2">
+                <Button variant="outline" onClick={onClose} className="flex-1">Cancel</Button>
+                <Button onClick={handleSave} className="flex-1 bg-blue-600 hover:bg-blue-700">Save</Button>
             </div>
         </div>
     );

@@ -6,12 +6,11 @@ import NodeToolbar from '@/components/editor/NodeToolbar';
 import { usePipelineStore } from '@/store/pipelineStore';
 import { compilePipeline } from '@/lib/compiler';
 import { Button } from '@/components/ui/button';
-import { Info } from 'lucide-react';
+import { Save, Info } from 'lucide-react';
 
 export default function BuilderPage() {
     const { nodes, edges } = usePipelineStore();
     const [saving, setSaving] = useState(false);
-    const [showHelp, setShowHelp] = useState(true);
 
     const handleSave = async () => {
         setSaving(true);
@@ -42,36 +41,45 @@ export default function BuilderPage() {
     };
 
     return (
-        <div className="p-4 h-screen flex flex-col">
-            <div className="flex justify-between items-center mb-4">
-                <h1 className="text-2xl font-bold">Pipeline Builder</h1>
-                <div className="flex gap-2">
-                    <Button variant="outline" onClick={() => setShowHelp(!showHelp)}>
-                        <Info className="w-4 h-4 mr-2" />
-                        {showHelp ? 'Hide' : 'Show'} Help
-                    </Button>
-                    <Button onClick={handleSave} disabled={saving}>
-                        {saving ? 'Saving...' : 'Save Pipeline'}
-                    </Button>
+        <div className="h-screen flex flex-col bg-slate-50">
+            {/* Header */}
+            <div className="bg-white border-b shadow-sm px-6 py-4 flex justify-between items-center">
+                <div>
+                    <h1 className="text-2xl font-bold text-gray-900">Pipeline Builder</h1>
+                    <p className="text-sm text-gray-500 mt-1">Create and configure your signal validation pipelines</p>
                 </div>
+                <Button onClick={handleSave} disabled={saving} className="bg-blue-600 hover:bg-blue-700">
+                    <Save className="w-4 h-4 mr-2" />
+                    {saving ? 'Saving...' : 'Save Pipeline'}
+                </Button>
             </div>
 
-            {showHelp && (
-                <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                    <h3 className="font-semibold mb-2 text-blue-900">Quick Guide:</h3>
-                    <ul className="text-sm text-blue-800 space-y-1">
-                        <li>• Click toolbar buttons to add nodes to the canvas</li>
-                        <li>• <strong>Drag from a node's bottom circle to another node's top circle</strong> to connect them</li>
-                        <li>• <strong>Double-click a node</strong> to configure its parameters (duration, conditions, etc.)</li>
-                        <li>• Drag nodes to rearrange your pipeline</li>
-                        <li>• Click Save when ready to create your pipeline</li>
-                    </ul>
+            {/* Three-column layout */}
+            <div className="flex-1 flex overflow-hidden">
+                {/* Left Sidebar - Tools */}
+                <div className="w-64 bg-white border-r shadow-sm flex flex-col">
+                    <div className="p-4 border-b bg-slate-50">
+                        <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">Node Tools</h2>
+                        <p className="text-xs text-gray-500 mt-1">Click to add nodes</p>
+                    </div>
+                    <div className="flex-1 p-4">
+                        <NodeToolbar />
+                    </div>
+                    <div className="p-4 border-t bg-blue-50">
+                        <div className="flex items-start gap-2">
+                            <Info className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                            <div className="text-xs text-blue-800">
+                                <p className="font-semibold mb-1">How to connect:</p>
+                                <p>Drag from the <strong>bottom handle</strong> of one node to the <strong>top handle</strong> of another node.</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            )}
 
-            <NodeToolbar />
-            <div className="mt-4 flex-1">
-                <PipelineEditor />
+                {/* Middle - Canvas */}
+                <div className="flex-1 flex flex-col bg-slate-100">
+                    <PipelineEditor />
+                </div>
             </div>
         </div>
     );
