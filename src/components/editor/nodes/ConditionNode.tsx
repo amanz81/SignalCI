@@ -1,0 +1,26 @@
+import React, { memo } from 'react';
+import { Handle, Position } from 'reactflow';
+import { GitBranch } from 'lucide-react';
+
+const ConditionNode = ({ data }: { data: { conditionType?: string; threshold?: string } }) => {
+    const conditionType = data.conditionType || 'Volume';
+    const threshold = data.threshold || 'Not set';
+
+    return (
+        <div className="px-4 py-2 shadow-md rounded-md bg-white border-2 border-stone-400">
+            <div className="flex items-center">
+                <div className="rounded-full w-8 h-8 flex justify-center items-center bg-stone-100">
+                    <GitBranch className="w-4 h-4" />
+                </div>
+                <div className="ml-2">
+                    <div className="text-lg font-bold">Condition</div>
+                    <div className="text-gray-500 text-xs">{conditionType}: {threshold}</div>
+                </div>
+            </div>
+            <Handle type="target" position={Position.Top} className="w-16 !bg-stone-500" />
+            <Handle type="source" position={Position.Bottom} className="w-16 !bg-stone-500" />
+        </div>
+    );
+};
+
+export default memo(ConditionNode);

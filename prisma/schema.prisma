@@ -1,0 +1,35 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Pipeline {
+  id          String   @id @default(uuid())
+  userId      String   @default("user_1") // Placeholder for auth
+  name        String
+  triggerToken String  @unique // The webhook URL slug
+  flowConfig  String   // The React Flow visual state (JSON string)
+  logicConfig String   // The compiled logic state (JSON string)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  executions  Execution[]
+}
+
+model Execution {
+  id          String   @id @default(uuid())
+  pipelineId  String
+  status      String   // PENDING, SUCCESS, FAILED
+  currentStep Int      // Which stage is it on?
+  logs        String   // Array of logs (JSON string)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  pipeline    Pipeline @relation(fields: [pipelineId], references: [id])
+}
