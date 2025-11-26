@@ -10,8 +10,10 @@ import { Save, Info, Moon, Sun } from 'lucide-react';
 
 export default function BuilderPage() {
     const { nodes, edges } = usePipelineStore();
+    const validatePipeline = usePipelineStore((state) => state.validatePipeline);
     const [saving, setSaving] = useState(false);
     const [darkMode, setDarkMode] = useState(false);
+    const [showValidation, setShowValidation] = useState(false);
 
     // Initialize dark mode from localStorage or system preference
     useEffect(() => {
@@ -33,7 +35,32 @@ export default function BuilderPage() {
         localStorage.setItem('darkMode', String(darkMode));
     }, [darkMode]);
 
+    const addError = usePipelineStore((state) => state.addError);
+
+    // Run validation on nodes/edges change (only show errors, not warnings)
+    useEffect(() => {
+        if (nodes.length > 0) {
+            const errors = validatePipeline();
+            // Only show critical errors automatically
+            errors
+                .filter(error => error.type === 'error')
+                .forEach(error => {
+                    addError(error.message, 'error');
+                });
+        }
+    }, [nodes.length, edges.length]); // Only depend on counts to avoid infinite loops
+
     const handleSave = async () => {
+        // Validate pipeline before saving
+        const validationErrors = validatePipeline();
+        const criticalErrors = validationErrors.filter(e => e.type === 'error');
+        
+        if (criticalErrors.length > 0) {
+            criticalErrors.forEach(error => addError(error.message, 'error'));
+            alert(`Cannot save: ${criticalErrors.length} critical error(s) found. Please fix them first.`);
+            return;
+        }
+
         setSaving(true);
         const logicConfig = compilePipeline(nodes, edges);
         const flowConfig = { nodes, edges };

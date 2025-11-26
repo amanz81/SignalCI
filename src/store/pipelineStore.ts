@@ -214,29 +214,79 @@ export const usePipelineStore = create<PipelineState>((set, get) => ({
         const { nodes, edges } = get();
         const errors: ValidationError[] = [];
 
-        // Check if there's at least one trigger
+        if (nodes.length === 0) {
+            return errors; // Empty pipeline is valid
+        }
+
+        // Rule 1: Detection pipeline must start with a Trigger (data source)
         const triggers = nodes.filter(n => n.type === 'trigger');
-        if (triggers.length === 0 && nodes.length > 0) {
+        if (triggers.length === 0) {
             errors.push({
                 id: 'no-trigger',
-                message: 'Pipeline needs a Trigger node as a starting point',
-                type: 'warning',
+                message: 'Detection pipeline must start with a Trigger (data source)',
+                type: 'error',
                 timestamp: Date.now(),
             });
         }
 
-        // Check if there's at least one action
+        // Rule 2: Must have at least one Action (alert/notification)
         const actions = nodes.filter(n => n.type === 'action');
-        if (actions.length === 0 && nodes.length > 0) {
+        if (actions.length === 0) {
             errors.push({
                 id: 'no-action',
-                message: 'Pipeline needs at least one Action node',
-                type: 'warning',
+                message: 'Detection pipeline must have at least one Action (alert) - what should happen when conditions are met?',
+                type: 'error',
                 timestamp: Date.now(),
             });
         }
 
-        // Check for disconnected nodes (except triggers)
+        // Rule 3: Every execution path must eventually reach an Action
+        // (DFS from each trigger to ensure all paths end at actions)
+        const validatePathEndsInAction = (startNodeId: string, visited = new Set<string>()): boolean => {
+            if (visited.has(startNodeId)) return true; // Cycle detected, skip
+            visited.add(startNodeId);
+
+            const node = nodes.find(n => n.id === startNodeId);
+            if (!node) return false;
+
+            // If we reached an action, this path is valid
+            if (node.type === 'action') return true;
+
+            // If node has no outputs, path doesn't end in action
+            const outgoingEdges = edges.filter(e => e.source === startNodeId);
+            if (outgoingEdges.length === 0) {
+                return false;
+            }
+
+            // Check all output paths
+            return outgoingEdges.every(edge => {
+                // For conditions, check both true and false branches
+                if (node.type === 'condition') {
+                    const trueBranch = edges.find(e => e.source === startNodeId && e.id === 'true');
+                    const falseBranch = edges.find(e => e.source === startNodeId && e.id === 'false');
+                    
+                    const trueValid = trueBranch ? validatePathEndsInAction(trueBranch.target, new Set(visited)) : false;
+                    const falseValid = falseBranch ? validatePathEndsInAction(falseBranch.target, new Set(visited)) : false;
+                    
+                    return trueValid && falseValid;
+                }
+                
+                return validatePathEndsInAction(edge.target, new Set(visited));
+            });
+        };
+
+        triggers.forEach(trigger => {
+            if (!validatePathEndsInAction(trigger.id)) {
+                errors.push({
+                    id: `path-no-action-${trigger.id}`,
+                    message: 'Not all execution paths lead to an Action. Every detection must eventually trigger an alert.',
+                    type: 'error',
+                    timestamp: Date.now(),
+                });
+            }
+        });
+
+        // Rule 4: Check for disconnected nodes (except triggers)
         nodes.forEach(node => {
             if (node.type !== 'trigger') {
                 const hasInput = edges.some(e => e.target === node.id);
@@ -251,18 +301,51 @@ export const usePipelineStore = create<PipelineState>((set, get) => ({
             }
         });
 
-        // Check for triggers with no output
+        // Rule 5: Triggers must have outputs
         triggers.forEach(trigger => {
             const hasOutput = edges.some(e => e.source === trigger.id);
             if (!hasOutput) {
                 errors.push({
                     id: `trigger-no-output-${trigger.id}`,
-                    message: 'Trigger is not connected to any node',
-                    type: 'warning',
+                    message: 'Trigger is not connected to any detection logic',
+                    type: 'error',
                     timestamp: Date.now(),
                 });
             }
         });
+
+        // Rule 6: Conditions should have both true/false branches configured (best practice)
+        const conditions = nodes.filter(n => n.type === 'condition');
+        conditions.forEach(condition => {
+            const conditionEdges = edges.filter(e => e.source === condition.id);
+            
+            if (conditionEdges.length === 0) {
+                errors.push({
+                    id: `condition-no-branches-${condition.id}`,
+                    message: 'Condition has no branches configured. Add connections for both true and false paths.',
+                    type: 'warning',
+                    timestamp: Date.now(),
+                });
+            } else if (conditionEdges.length === 1) {
+                errors.push({
+                    id: `condition-partial-branches-${condition.id}`,
+                    message: 'Condition should have both true and false branches for complete detection logic.',
+                    type: 'warning',
+                    timestamp: Date.now(),
+                });
+            }
+            // If 2+ edges, condition has both branches (good)
+        });
+
+        // Rule 7: Multiple triggers are allowed (multiple data sources)
+        if (triggers.length > 1) {
+            errors.push({
+                id: 'multiple-triggers',
+                message: `Multiple triggers detected (${triggers.length}). Each trigger creates a separate detection pipeline. Consider splitting into separate pipelines.`,
+                type: 'warning',
+                timestamp: Date.now(),
+            });
+        }
 
         return errors;
     },
