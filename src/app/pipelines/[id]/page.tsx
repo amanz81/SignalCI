@@ -77,8 +77,8 @@ export default async function PipelineDetailsPage({ params }: { params: Promise<
                                             <td className="p-4 text-sm">{new Date(exec.createdAt).toLocaleString()}</td>
                                             <td className="p-4">
                                                 <span className={`px-2 py-1 rounded text-xs font-bold ${exec.status === 'SUCCESS' ? 'bg-green-100 text-green-800' :
-                                                        exec.status === 'FAILED' ? 'bg-red-100 text-red-800' :
-                                                            'bg-yellow-100 text-yellow-800'
+                                                    exec.status === 'FAILED' ? 'bg-red-100 text-red-800' :
+                                                        'bg-yellow-100 text-yellow-800'
                                                     }`}>
                                                     {exec.status}
                                                 </span>
@@ -86,7 +86,7 @@ export default async function PipelineDetailsPage({ params }: { params: Promise<
                                             <td className="p-4 text-sm">{exec.currentStep}</td>
                                             <td className="p-4">
                                                 <pre className="text-xs bg-slate-50 p-2 rounded max-w-md overflow-auto">
-                                                    {exec.logs}
+                                                    {JSON.stringify(exec.logs, null, 2)}
                                                 </pre>
                                             </td>
                                         </tr>
