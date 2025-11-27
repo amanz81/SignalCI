@@ -22,9 +22,29 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# Local env files
+# Local env files (CRITICAL: Never commit production secrets)
 .env
 .env*.local
+.env.production
+.env.development
+.env.test
+
+# Secret management (Doppler, Infisical, etc.)
+.doppler/
+.infisical/
+secrets/
+*.secret
+*.key
+*.pem
+*.p12
+*.pfx
+
+# Production credentials
+DATABASE_URL
+INNGEST_SIGNING_KEY
+UPSTASH_REDIS_REST_URL
+UPSTASH_REDIS_REST_TOKEN
+SUPABASE_SERVICE_ROLE_KEY
 
 # Vercel
 .vercel

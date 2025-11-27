@@ -6,7 +6,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center p-4">
       <div className="max-w-4xl w-full">
-        <div className="text-center mb-12">
+        <div className="text-center mb-12" data-tour="home-welcome">
           <div className="flex items-center justify-center mb-4">
             <Activity className="w-16 h-16 text-blue-600" />
           </div>
@@ -23,7 +23,7 @@ export default function Home() {
 
         <div className="grid md:grid-cols-2 gap-6">
           <Link href="/builder">
-            <div className="p-8 bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow cursor-pointer border-2 border-transparent hover:border-blue-500">
+            <div className="p-8 bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow cursor-pointer border-2 border-transparent hover:border-blue-500" data-tour="home-builder">
               <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
                 <Activity className="w-6 h-6 text-blue-600" />
               </div>
@@ -36,7 +36,7 @@ export default function Home() {
           </Link>
 
           <Link href="/dashboard">
-            <div className="p-8 bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow cursor-pointer border-2 border-transparent hover:border-purple-500">
+            <div className="p-8 bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow cursor-pointer border-2 border-transparent hover:border-purple-500" data-tour="home-dashboard">
               <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
                 <LayoutDashboard className="w-6 h-6 text-purple-600" />
               </div>

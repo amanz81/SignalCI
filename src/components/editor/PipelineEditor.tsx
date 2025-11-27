@@ -35,6 +35,12 @@ export default function PipelineEditor({ darkMode = false }: PipelineEditorProps
     const clearError = usePipelineStore((state) => state.clearError);
     const setNodes = usePipelineStore((state) => state.setNodes);
 
+    // Calculate step count (excluding trigger)
+    const stepCount = nodes.filter(n => n.type !== 'trigger').length;
+    const maxSteps = 10;
+    const isAtLimit = stepCount >= maxSteps;
+    const isNearLimit = stepCount >= maxSteps - 2;
+
     const [selectedNode, setSelectedNode] = useState<Node | null>(null);
     const [selectedEdge, setSelectedEdge] = useState<Edge | null>(null);
 
@@ -70,7 +76,7 @@ export default function PipelineEditor({ darkMode = false }: PipelineEditorProps
         }
     }, [selectedEdge, deleteEdge]);
 
-    const handleConfigSave = useCallback((newData: any) => {
+    const handleConfigSave = useCallback((newData: Record<string, unknown>) => {
         if (selectedNode) {
             const updatedNodes = nodes.map((n) =>
                 n.id === selectedNode.id ? { ...n, data: newData } : n
@@ -128,6 +134,24 @@ export default function PipelineEditor({ darkMode = false }: PipelineEditorProps
 
     return (
         <div className="flex-1 flex overflow-hidden relative">
+            {/* Step Counter Badge */}
+            <div className="absolute top-4 right-[400px] z-50">
+                <div className={`px-4 py-2 rounded-lg shadow-lg flex items-center gap-2 ${
+                    isAtLimit 
+                        ? 'bg-red-500 text-white' 
+                        : isNearLimit 
+                            ? 'bg-amber-500 text-white' 
+                            : 'bg-blue-500 text-white'
+                }`} title={`Pipeline steps: ${stepCount} of ${maxSteps} maximum`}>
+                    <span className="text-sm font-semibold">
+                        Steps: {stepCount} / {maxSteps}
+                    </span>
+                    {isAtLimit && (
+                        <AlertCircle className="w-4 h-4" aria-label="Maximum steps reached" />
+                    )}
+                </div>
+            </div>
+
             {/* Error Toast Container */}
             <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-50 flex flex-col gap-2">
                 {errors.map((error) => (
@@ -148,6 +172,8 @@ export default function PipelineEditor({ darkMode = false }: PipelineEditorProps
                         <button
                             onClick={() => clearError(error.id)}
                             className="p-1 hover:bg-white/20 rounded transition-colors"
+                            title="Dismiss error"
+                            aria-label="Dismiss error"
                         >
                             <X className="w-4 h-4" />
                         </button>
@@ -161,6 +187,8 @@ export default function PipelineEditor({ darkMode = false }: PipelineEditorProps
                     <button
                         onClick={handleDeleteEdge}
                         className="flex items-center gap-2 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg shadow-lg transition-colors"
+                        title="Delete this connection"
+                        aria-label="Delete connection"
                     >
                         <Trash2 className="w-4 h-4" />
                         <span className="text-sm font-medium">Delete Connection</span>
@@ -169,7 +197,7 @@ export default function PipelineEditor({ darkMode = false }: PipelineEditorProps
             )}
 
             {/* Canvas */}
-            <div className="flex-1 relative">
+            <div className="flex-1 relative" data-tour="builder-canvas">
                 <ReactFlowProvider>
                     <ReactFlow
                         nodes={nodes}

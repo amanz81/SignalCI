@@ -66,6 +66,123 @@ We use software engineering metaphors to validate trading ideas:
 | ORM | Prisma | Database access and schema management. |
 | Styling | Tailwind + shadcn/ui | Rapid UI development. |
 
+### 4.1 Master Architecture Diagram
+
+This diagram represents the Single Source of Truth for the system architecture:
+
+```mermaid
+graph TD
+
+    subgraph "Client Layer (UX Team)"
+
+        User[("👤 Trader")]
+
+        WebApp["🖥️ Web Dashboard<br/>(React Flow / Next.js)"]
+
+        MobileApp["📱 Mobile Monitor<br/>(Read-Only View)"]
+
+    end
+
+
+
+    subgraph "The Edge (Security Team)"
+
+        Firewall["🛡️ Cloudflare / WAF"]
+
+        APIGateway["🚪 Next.js API Routes<br/>(Rate Limiting + Auth)"]
+
+    end
+
+
+
+    subgraph "The Brain (Inngest Engine)"
+
+        Orchestrator["⚙️ Inngest Orchestrator<br/>(State Machine)"]
+
+        WaitQueue[("⏳ Wait/Sleep Queue")]
+
+        RetryLogic["🔄 Retry & Error Handling"]
+
+    end
+
+
+
+    subgraph "Data Persistence (Supabase)"
+
+        DB[("🗄️ PostgreSQL<br/>(Pipeline Configs & Logs)")]
+
+        Vault[("🔐 Supabase Vault<br/>(Encrypted API Keys)")]
+
+    end
+
+
+
+    subgraph "Integration Layer (Adapter Pattern)"
+
+        IntManager["🔌 Integration Manager"]
+
+         MetricAdapters["📈 Metric Adapters<br/>(CoinGecko, Binance, On-Chain)"]
+
+         ActionAdapters["📢 Action Adapters<br/>(Telegram, Discord, Exchange)"]
+
+    end
+
+
+
+    %% Flows
+
+    User -->|Builds Pipeline| WebApp
+
+    User -->|Checks Status| MobileApp
+
+    WebApp -->|Save Config| APIGateway
+
+    MobileApp -->|Poll Status| APIGateway
+
+    
+
+    APIGateway -->|Auth Check| DB
+
+    APIGateway -->|Trigger Event| Orchestrator
+
+    
+
+    Orchestrator -->|Read Config| DB
+
+    Orchestrator -->|Get Keys| Vault
+
+    Orchestrator -->|Sleep '10m'| WaitQueue
+
+    
+
+    Orchestrator -->|Execute Step| IntManager
+
+    IntManager -->|Fetch Data| MetricAdapters
+
+    IntManager -->|Send Alert| ActionAdapters
+
+    
+
+    MetricAdapters -->|HTTP GET| ExternalAPIs(("☁️ External Markets"))
+
+    ActionAdapters -->|HTTP POST| ExternalUsers(("☁️ User Telegram"))
+```
+
+### 4.2 Strategic Constraints & Directives
+
+#### Product & UX Constraints
+- **Max Steps Limit:** Hard limit of 10 steps per pipeline (MVP constraint to prevent infinite loops and serverless budget drain)
+- **No Infinite Loops:** React Flow UI must prevent circular connections that could create infinite execution loops
+
+#### Security Directives
+- **Key Rotation UI:** Users must have a "Revoke" button to instantly wipe API keys from Vault if compromised
+- **Vault Integration:** All API keys stored in Supabase Vault (encrypted, never displayed in UI)
+
+#### Integration Constraints
+- **Read-Only Metrics Only (V1):** No auto-trade/execution adapters in V1
+- **Notification Actions Only:** Telegram, Discord, and other notification channels are allowed
+- **Auto-Trade is V2:** Exchange execution adapters are explicitly deferred to V2 due to liability concerns
+
 ---
 
 ## 5. Implementation Context (For AI Assistants)
@@ -265,7 +382,43 @@ COINGECKO_API_KEY=...
 
 ---
 
+### 4.3 Execution Strategy & Squad Organization
+
+To build this fast, engineering resources are split into two "Squads":
+
+#### Squad A: "The Frontend Factory" (Focus: React Flow)
+- **Goal:** Build the Canvas where JSON becomes Visual Nodes
+- **Key Challenge:** Mobile responsiveness. The "Monitor View" needs to look like a simple list, not a squashed graph
+- **Deliverables:**
+  - React Flow canvas with node types (Trigger, Wait, Condition, Action)
+  - Mobile-responsive list/card view for monitoring
+  - Max 10 steps validation and visual indicators
+
+#### Squad B: "The Pipeline Plumbers" (Focus: Inngest + Adapters)
+- **Goal:** Build the `executePipeline` function that creates the state machine
+- **Key Challenge:** Handling API failures. If CoinGecko is down for 5 seconds, we shouldn't fail the user's trade
+- **Deliverables:**
+  - Inngest workflow with retry logic (exponential backoff)
+  - Integration adapters (Metric Adapters: CoinGecko, Binance read-only; Action Adapters: Telegram, Discord)
+  - Execution logging for debugging
+
+### 4.4 Risk Assessment
+
+**Current Risk Level:** Low
+- ✅ No auto-trading functionality (V1 is read-only)
+- ✅ Max 10 steps prevents infinite loops
+- ✅ Serverless architecture limits resource drain
+- ✅ Tenant isolation prevents cross-user data leaks
+- ✅ API keys encrypted in Supabase Vault
+
+**V2 Considerations:**
+- Auto-trade/Exchange execution adapters are explicitly deferred to V2 due to liability concerns
+- If our code bugs out and buys 100 BTC, we are sued
+- V1 focuses on Read-Only Metrics and Notification Actions only
+
+---
+
 **Last Updated:** 2025-01-25  
-**Version:** 1.0  
+**Version:** 1.1 (Unified Architecture Strategy)  
 **Status:** Active Development
 

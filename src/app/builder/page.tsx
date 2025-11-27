@@ -91,7 +91,7 @@ export default function BuilderPage() {
     return (
         <div className="h-screen flex flex-col bg-slate-50 dark:bg-gray-950">
             {/* Header */}
-            <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 shadow-sm px-6 py-4 flex justify-between items-center">
+            <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 shadow-sm px-6 py-4 flex justify-between items-center" data-tour="builder-header">
                 <div>
                     <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Pipeline Builder</h1>
                     <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Create and configure your signal validation pipelines</p>
@@ -108,7 +108,7 @@ export default function BuilderPage() {
                             <Moon className="w-5 h-5 text-gray-600" />
                         )}
                     </button>
-                    <Button onClick={handleSave} disabled={saving} className="bg-blue-600 hover:bg-blue-700">
+                    <Button onClick={handleSave} disabled={saving} className="bg-blue-600 hover:bg-blue-700" data-tour="builder-save">
                         <Save className="w-4 h-4 mr-2" />
                         {saving ? 'Saving...' : 'Save Pipeline'}
                     </Button>
@@ -118,7 +118,7 @@ export default function BuilderPage() {
             {/* Three-column layout */}
             <div className="flex-1 flex overflow-hidden">
                 {/* Left Sidebar - Tools */}
-                <div className="w-64 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 shadow-sm flex flex-col">
+                <div className="w-64 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 shadow-sm flex flex-col" data-tour="builder-toolbar">
                     <div className="p-4 border-b border-gray-200 dark:border-gray-800 bg-slate-50 dark:bg-gray-800">
                         <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide">Node Tools</h2>
                         <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Click to add nodes</p>

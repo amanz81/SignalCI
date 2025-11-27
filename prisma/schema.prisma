@@ -14,13 +14,27 @@ model Pipeline {
   id           String   @id @default(uuid())
   userId       String   @default("user_1") // Placeholder for auth
   name         String
-  triggerToken String   @unique // Webhook slug
+  triggerToken String   @unique // Secure webhook token (32-byte hex)
+  signalSecret String?  // Optional payload secret for additional validation
   flowConfig   Json     // UI State (React Flow)
   logicConfig  Json     // Execution State (Clean JSON)
   isActive      Boolean  @default(true)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
   executions    Execution[]
+  apiKeys       ApiKey[] // Encrypted API keys for this pipeline
+}
+
+model ApiKey {
+  id         String   @id @default(uuid())
+  pipelineId String
+  provider   String   // "binance", "coinbase", etc.
+  keyId      String   // Reference to Supabase Vault encrypted value
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  pipeline   Pipeline @relation(fields: [pipelineId], references: [id], onDelete: Cascade)
+  
+  @@unique([pipelineId, provider])
 }
 
 model Execution {

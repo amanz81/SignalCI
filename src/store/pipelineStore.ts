@@ -142,7 +142,16 @@ export const usePipelineStore = create<PipelineState>((set, get) => ({
             return false;
         }
 
-        // Rule 7: Prevent circular connections (basic check)
+        // Rule 7: MVP Constraint - Check max steps limit (10 steps excluding trigger)
+        const nonTriggerNodes = nodes.filter(n => n.type !== 'trigger');
+        // If adding this connection would create a new node path, check the limit
+        // Note: This is a simplified check - we're checking total non-trigger nodes
+        if (nonTriggerNodes.length >= 10) {
+            addError('Maximum of 10 steps reached (excluding trigger). This limit prevents infinite loops and protects serverless costs.');
+            return false;
+        }
+
+        // Rule 8: Prevent circular connections (basic check)
         const wouldCreateCycle = (source: string, target: string, visited = new Set<string>()): boolean => {
             if (source === target) return true;
             if (visited.has(target)) return false;
@@ -216,6 +225,18 @@ export const usePipelineStore = create<PipelineState>((set, get) => ({
 
         if (nodes.length === 0) {
             return errors; // Empty pipeline is valid
+        }
+
+        // Rule 0: MVP Constraint - Max 10 steps (excluding trigger)
+        // This prevents infinite loops and serverless budget drain
+        const nonTriggerNodes = nodes.filter(n => n.type !== 'trigger');
+        if (nonTriggerNodes.length > 10) {
+            errors.push({
+                id: 'max-steps-exceeded',
+                message: `Pipeline exceeds maximum of 10 steps (currently ${nonTriggerNodes.length}). This limit prevents infinite loops and protects serverless costs.`,
+                type: 'error',
+                timestamp: Date.now(),
+            });
         }
 
         // Rule 1: Detection pipeline must start with a Trigger (data source)
@@ -346,6 +367,36 @@ export const usePipelineStore = create<PipelineState>((set, get) => ({
                 timestamp: Date.now(),
             });
         }
+
+        // Rule 8: Check for potential infinite loops (circular paths)
+        // This is a safety check beyond the max steps limit
+        const hasCircularPath = (startNodeId: string, visited = new Set<string>(), path = new Set<string>()): boolean => {
+            if (path.has(startNodeId)) return true; // Circular path detected
+            if (visited.has(startNodeId)) return false; // Already checked this node
+            
+            visited.add(startNodeId);
+            path.add(startNodeId);
+            
+            const outgoingEdges = edges.filter(e => e.source === startNodeId);
+            for (const edge of outgoingEdges) {
+                if (hasCircularPath(edge.target, visited, new Set(path))) {
+                    return true;
+                }
+            }
+            
+            return false;
+        };
+
+        triggers.forEach(trigger => {
+            if (hasCircularPath(trigger.id)) {
+                errors.push({
+                    id: `circular-path-${trigger.id}`,
+                    message: 'Circular path detected. This could create an infinite loop. Remove circular connections.',
+                    type: 'error',
+                    timestamp: Date.now(),
+                });
+            }
+        });
 
         return errors;
     },

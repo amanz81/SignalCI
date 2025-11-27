@@ -1,10 +1,10 @@
 import React from 'react';
-import { PrismaClient } from '@prisma/client';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Plus, ExternalLink } from 'lucide-react';
 
 import { prisma } from '@/lib/prisma';
+import { getWebhookUrl } from '@/lib/webhookUrl';
 
 export const dynamic = 'force-dynamic';
 
@@ -23,13 +23,13 @@ export default async function DashboardPage() {
                     </Link>
                 </div>
 
-                <div className="flex justify-between items-center mb-6">
+                <div className="flex justify-between items-center mb-6" data-tour="dashboard-header">
                     <div>
                         <h1 className="text-3xl font-bold">Your Pipelines</h1>
                         <p className="text-gray-500 mt-1">Manage and monitor your signal validation pipelines</p>
                     </div>
                     <Link href="/builder">
-                        <Button>
+                        <Button data-tour="dashboard-create">
                             <Plus className="w-4 h-4 mr-2" />
                             Create New Pipeline
                         </Button>
@@ -37,8 +37,8 @@ export default async function DashboardPage() {
                 </div>
 
                 <div className="grid gap-4">
-                    {pipelines.map((pipeline) => (
-                        <div key={pipeline.id} className="p-6 border rounded-lg shadow-sm bg-white hover:shadow-md transition-shadow">
+                    {pipelines.map((pipeline, index) => (
+                        <div key={pipeline.id} className="p-6 border rounded-lg shadow-sm bg-white hover:shadow-md transition-shadow" data-tour={index === 0 ? "dashboard-pipeline" : undefined}>
                             <div className="flex justify-between items-start">
                                 <div className="flex-1">
                                     <h2 className="text-xl font-semibold mb-2">{pipeline.name}</h2>
@@ -51,8 +51,8 @@ export default async function DashboardPage() {
                                     </div>
                                     <div className="bg-slate-50 p-3 rounded border">
                                         <p className="text-xs text-gray-500 mb-1">Webhook URL:</p>
-                                        <code className="text-sm font-mono text-blue-600">
-                                            {typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000'}/api/webhook/{pipeline.triggerToken}
+                                        <code className="text-sm font-mono text-blue-600 break-all">
+                                            {getWebhookUrl(pipeline.triggerToken, process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000')}
                                         </code>
                                     </div>
                                 </div>
