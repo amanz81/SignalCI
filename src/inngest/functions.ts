@@ -1,6 +1,6 @@
 import { inngest } from "./client";
 import { prisma } from "@/lib/prisma";
-import { LogicStep } from "@/lib/compiler";
+import { LogicStep } from "@/lib/transformFlowToLogic";
 
 // Helper to log execution steps
 async function logStep(executionId: string, stepName: string, status: 'PENDING' | 'SUCCESS' | 'FAILED', details: any) {

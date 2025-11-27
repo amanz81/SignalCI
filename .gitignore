@@ -43,4 +43,9 @@ next-env.d.ts
 *.swp
 *.swo
 *~
+
+# History files (never commit)
 .history/
+*.history
+.cursor/
+.history

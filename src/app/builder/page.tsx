@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import PipelineEditor from '@/components/editor/PipelineEditor';
 import NodeToolbar from '@/components/editor/NodeToolbar';
 import { usePipelineStore } from '@/store/pipelineStore';
-import { compilePipeline } from '@/lib/compiler';
+import { transformFlowToLogic } from '@/lib/transformFlowToLogic';
 import { Button } from '@/components/ui/button';
 import { Save, Info, Moon, Sun } from 'lucide-react';
 
@@ -62,7 +62,7 @@ export default function BuilderPage() {
         }
 
         setSaving(true);
-        const logicConfig = compilePipeline(nodes, edges);
+        const logicConfig = transformFlowToLogic(nodes, edges);
         const flowConfig = { nodes, edges };
 
         try {

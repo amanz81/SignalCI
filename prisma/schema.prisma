@@ -11,24 +11,24 @@ datasource db {
 }
 
 model Pipeline {
-  id          String   @id @default(uuid())
-  userId      String   @default("user_1") // Placeholder for auth
-  name        String
-  triggerToken String  @unique // The webhook URL slug
-  flowConfig  Json     // The React Flow visual state (JSON)
-  logicConfig Json     // The compiled logic state (JSON)
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  executions  Execution[]
+  id           String   @id @default(uuid())
+  userId       String   @default("user_1") // Placeholder for auth
+  name         String
+  triggerToken String   @unique // Webhook slug
+  flowConfig   Json     // UI State (React Flow)
+  logicConfig  Json     // Execution State (Clean JSON)
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  executions    Execution[]
 }
 
 model Execution {
   id          String   @id @default(uuid())
   pipelineId  String
-  status      String   // PENDING, SUCCESS, FAILED
-  currentStep Int      // Which stage is it on?
-  logs        Json     // Array of logs (JSON)
+  status      String   // PENDING, RUNNING, SUCCESS, FAILED
+  currentStep Int      @default(0) // Which stage is it on?
+  logs        Json     // Array of step results
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   pipeline    Pipeline @relation(fields: [pipelineId], references: [id])
