@@ -5,25 +5,28 @@ import { validatePayloadSecret } from "@/lib/security";
 import { checkRateLimit } from "@/lib/rateLimit";
 
 /**
- * Secure webhook endpoint using token-based authentication
- * Route: /api/webhook/v1/{token}
+ * Legacy webhook endpoint using pipeline ID
+ * Route: /api/webhook/{pipelineId}
+ * 
+ * Note: The preferred endpoint is /api/webhook/v1/{token} for better security.
+ * This endpoint is kept for backward compatibility.
  * 
  * Security layers:
- * 1. Token-based authentication (32-byte random hex)
+ * 1. Pipeline ID lookup
  * 2. Payload secret validation (if configured)
- * 3. Rate limiting (10 req/10s per IP/Token)
+ * 3. Rate limiting (10 req/10s per IP/Pipeline)
  */
 export async function POST(
     req: NextRequest,
-    { params }: { params: Promise<{ token: string }> }
+    { params }: { params: Promise<{ pipelineId: string }> }
 ) {
-    const { token } = await params;
+    const { pipelineId } = await params;
 
     // 1. Rate Limiting (Anti-DDoS)
     const clientIp = req.headers.get("x-forwarded-for")?.split(",")[0] || 
                      req.headers.get("x-real-ip") || 
                      "unknown";
-    const rateLimitKey = `${token}:${clientIp}`;
+    const rateLimitKey = `${pipelineId}:${clientIp}`;
     
     const rateLimitResult = await checkRateLimit(rateLimitKey);
     if (!rateLimitResult.success) {
@@ -37,9 +40,9 @@ export async function POST(
         );
     }
 
-    // 2. Find Pipeline by Token
+    // 2. Find Pipeline by ID
     const pipeline = await prisma.pipeline.findUnique({
-        where: { triggerToken: token },
+        where: { id: pipelineId },
     });
 
     if (!pipeline) {

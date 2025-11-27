@@ -80,8 +80,8 @@ describe('transformFlowToLogic', () => {
 
         const edges: Edge[] = [
             { id: 'e1', source: 'trigger-1', target: 'condition-1' },
-            { id: 'e2', source: 'condition-1', target: 'action-true', id: 'true' },
-            { id: 'e3', source: 'condition-1', target: 'action-false', id: 'false' },
+            { id: 'true', source: 'condition-1', target: 'action-true' },
+            { id: 'false', source: 'condition-1', target: 'action-false' },
         ];
 
         const result = transformFlowToLogic(nodes, edges);
