@@ -15,8 +15,8 @@ model Pipeline {
   userId      String   @default("user_1") // Placeholder for auth
   name        String
   triggerToken String  @unique // The webhook URL slug
-  flowConfig  String   // The React Flow visual state (JSON string)
-  logicConfig String   // The compiled logic state (JSON string)
+  flowConfig  Json     // The React Flow visual state (JSON)
+  logicConfig Json     // The compiled logic state (JSON)
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -28,7 +28,7 @@ model Execution {
   pipelineId  String
   status      String   // PENDING, SUCCESS, FAILED
   currentStep Int      // Which stage is it on?
-  logs        String   // Array of logs (JSON string)
+  logs        Json     // Array of logs (JSON)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   pipeline    Pipeline @relation(fields: [pipelineId], references: [id])

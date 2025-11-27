@@ -11,8 +11,8 @@ export async function POST(req: NextRequest) {
         data: {
             name,
             triggerToken: name.toLowerCase().replace(/\s+/g, '-') + '-' + Date.now(), // Simple unique slug
-            flowConfig: JSON.stringify(flowConfig),
-            logicConfig: JSON.stringify(logicConfig),
+            flowConfig: flowConfig,
+            logicConfig: logicConfig,
             userId: "user_1", // Placeholder
         },
     });
